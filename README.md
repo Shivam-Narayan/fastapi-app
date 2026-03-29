@@ -36,7 +36,7 @@ A comprehensive FastAPI-based backend application for managing intents, built wi
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd FastAPI-learn/backend
+   cd fastapi-app
    ```
 
 2. **Start all services**
@@ -48,10 +48,21 @@ A comprehensive FastAPI-based backend application for managing intents, built wi
    ./scripts/start.sh
    ```
 
+   Available flags:
+   | Flag | Description |
+   |------|-------------|
+   | *(none)* | Build image if needed, then start all services |
+   | `--fast` | Start services without rebuilding (fastest) |
+   | `--build` | Force image rebuild before starting |
+   | `--down` | Stop and remove all services and volumes |
+
    This will:
+   - Auto-start Docker Desktop if the daemon is not running (Windows)
    - Start PostgreSQL, FastAPI app, pgAdmin, Grafana, Loki, and Promtail
+   - Wait for PostgreSQL to be healthy before running migrations
    - Run database migrations automatically
    - Display service status and access URLs
+   - If port 8000 is already in use, FastAPI is automatically bound to the next free port (8001, 8002, …)
 
 3. **Access the application**
    - **API**: http://localhost:8000
@@ -114,15 +125,19 @@ The API includes JWT-based authentication middleware. Include the JWT token in t
 
 ## Monitoring & Logging
 
-- **Grafana**: Dashboard for metrics at http://localhost:3000
-- **Loki**: Log aggregation
+- **Grafana**: Dashboard for metrics at http://localhost:4000 (admin / admin)
+- **Loki**: Log aggregation at http://localhost:3100
 - **Promtail**: Log shipping from Docker containers
 
 ## Scripts
 
-- `scripts/start.sh` / `scripts/start.bat` - Start all services
-- `scripts/migrate.sh` - Run database migrations manually
-- `scripts/start.sh --down` / `scripts/start.bat --down` - Stop all services
+| Script | Flag | Description |
+|--------|------|-------------|
+| `scripts/start.bat` / `scripts/start.sh` | *(none)* | Build and start all services |
+| `scripts/start.bat` / `scripts/start.sh` | `--fast` | Start without rebuilding images |
+| `scripts/start.bat` / `scripts/start.sh` | `--build` | Force rebuild then start |
+| `scripts/start.bat` / `scripts/start.sh` | `--down` | Stop all services and remove volumes |
+| `scripts/migrate.sh` | | Run database migrations manually |
 
 ## Development
 
