@@ -1,0 +1,7 @@
+﻿NAMES                    STATUS                   PORTS
+fastapi-app-app-1        Up 2 minutes             0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp
+fastapi-app-postgres-1   Up 2 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+fastapi-app-loki-1       Up 2 minutes             0.0.0.0:3100->3100/tcp, [::]:3100->3100/tcp
+fastapi-app-grafana-1    Up 2 minutes             3000/tcp
+fastapi-app-pgadmin-1    Up 2 minutes             80/tcp
+fastapi-app-promtail-1   Up 16 minutes            
