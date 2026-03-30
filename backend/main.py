@@ -1,16 +1,14 @@
-import os
 import uvicorn
-from typing import Optional
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from logger import configure_logging
 from routes.route_handler import all_routers
 from utils.middleware import AuthMiddleware
 from __init__ import __version__
-from db_pool import Base, engine
 
 load_dotenv()
+logger = configure_logging(__name__)
 
 
 def create_app() -> FastAPI:
@@ -21,10 +19,8 @@ def create_app() -> FastAPI:
         version=__version__,
     )
 
-    # Add Auth middleware (class-based)
     app.add_middleware(AuthMiddleware)
 
-    # Add CORS middleware
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -33,56 +29,35 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Include all routes
     all_routers(app)
 
-    # Startup event
     @app.on_event("startup")
-    def startup_event():
-        logger = configure_logging(__name__)
+    async def startup_event() -> None:
         logger.info("Logger is configured.")
-        
-        # Create all tables
-        try:
-            Base.metadata.create_all(bind=engine)
-            logger.info("Database tables created.")
-        except Exception as e:
-            logger.error(f"Failed to create database tables: {e}")
-            logger.warning("Continuing without database. Make sure PostgreSQL is running.")
 
-        # Create data directory for attachment-worker service
-        if os.getenv("SERVICE_TYPE") == "attachment-worker":
-            os.makedirs("data", exist_ok=True)
-
-    # Shutdown event
     @app.on_event("shutdown")
-    def shutdown_event():
-        logger = configure_logging(__name__)
+    async def shutdown_event() -> None:
         logger.info("Server is shutting down.")
 
-    # Root endpoint
     @app.get("/")
-    async def root():
+    async def root() -> dict[str, str]:
         return {"message": "App API is running"}
 
-    # Health check endpoint
     @app.get("/health")
-    async def health_check():
+    async def health_check() -> dict[str, str]:
         return {"status": "ok"}
 
-    # Favicon endpoint
     @app.get("/favicon.ico")
-    async def favicon():
-        pass
+    async def favicon() -> Response:
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
 
     return app
 
 
-# Create FastAPI app
 app = create_app()
 
 
-def start_server(host: Optional[str] = None, port: Optional[int] = None):
+def start_server(host: str | None = None, port: int | None = None) -> None:
     """Start the server."""
     uvicorn.run(
         "main:app",
