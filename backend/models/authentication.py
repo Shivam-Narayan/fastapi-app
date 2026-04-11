@@ -23,7 +23,7 @@ class Authentication(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
     # Relationship with User model
-    user: Mapped[Optional["User"]] = relationship(
+    user: Mapped[Optional["User"]] = relationship(  #type: ignore
         "User", back_populates="authentications"
     )
 
