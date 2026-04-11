@@ -32,7 +32,7 @@ class User(Base):
     )
     user_config: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
 
-    #Relationship with Authentication model
+    # Relationship with Authentication model
     authentications: Mapped[list["Authentication"]] = relationship( #type: ignore
         "Authentication", back_populates="user", cascade="all, delete, delete-orphan"
     )

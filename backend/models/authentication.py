@@ -11,10 +11,10 @@ class Authentication(Base):
     __tablename__ = "authentications"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID[UUID](as_uuid=True), primary_key=True, default=uuid.uuid4, index=True
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True
     )
     user_uuid: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID[UUID](as_uuid=True), ForeignKey("users.id"), index= True, nullable=True
+        UUID(as_uuid=True), ForeignKey("users.id"), index=True, nullable=True
     )
     access_token: Mapped[Optional[str]] = mapped_column(
         String, index=True, nullable=True
@@ -23,7 +23,7 @@ class Authentication(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
     # Relationship with User model
-    user: Mapped[Optional["User"]] = relationship(  # type: ignore
+    user: Mapped[Optional["User"]] = relationship(
         "User", back_populates="authentications"
     )
 
