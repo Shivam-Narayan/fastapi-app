@@ -95,9 +95,31 @@ REM Create logs directory
 if not exist "logs" mkdir logs
 echo Logs directory created
 
-REM Pick app host port (prefer 8000, fallback to next free up to 8100)
+REM Pick app host port with stable behavior:
+REM 1) Prefer 8000 when free
+REM 2) If 8000 is busy, reuse current app mapping when present
+REM 3) Otherwise pick next free port up to 8100
 set "APP_PORT="
-for /f %%P in ('powershell -NoProfile -Command "$selected=0; foreach($p in 8000..8100){ if(-not (Get-NetTCPConnection -State Listen -LocalPort $p -ErrorAction SilentlyContinue)){ $selected=$p; break } }; if($selected -eq 0){ exit 1 } else { Write-Output $selected }"') do set "APP_PORT=%%P"
+set "EXISTING_PORT_LINE="
+set "EXISTING_PORT="
+for /f %%L in ('docker compose -f "%COMPOSE_FILE%" port app 8000 2^>nul') do (
+    if not defined EXISTING_PORT_LINE set "EXISTING_PORT_LINE=%%L"
+)
+
+if defined EXISTING_PORT_LINE (
+    for /f "tokens=2 delims=:" %%P in ("%EXISTING_PORT_LINE%") do set "EXISTING_PORT=%%P"
+)
+
+set "PORT8000_FREE="
+for /f %%F in ('powershell -NoProfile -Command "if (Get-NetTCPConnection -State Listen -LocalPort 8000 -ErrorAction SilentlyContinue) { Write-Output 0 } else { Write-Output 1 }"') do set "PORT8000_FREE=%%F"
+
+if "%PORT8000_FREE%"=="1" (
+    set "APP_PORT=8000"
+) else if defined EXISTING_PORT (
+    set "APP_PORT=%EXISTING_PORT%"
+) else (
+    for /f %%P in ('powershell -NoProfile -Command "$selected=0; foreach($p in 8001..8100){ if(-not (Get-NetTCPConnection -State Listen -LocalPort $p -ErrorAction SilentlyContinue)){ $selected=$p; break } }; if($selected -eq 0){ exit 1 } else { Write-Output $selected }"') do set "APP_PORT=%%P"
+)
 
 if "%APP_PORT%"=="" (
     echo Could not determine a free port between 8000 and 8100

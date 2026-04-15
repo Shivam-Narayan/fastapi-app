@@ -3,7 +3,7 @@ import os
 import threading
 import asyncio
 from contextlib import contextmanager, asynccontextmanager
-from typing import Dict, Generator, AsyncGenerator, Any
+from typing import Dict, Generator, AsyncGenerator
 
 # Third-party imports
 from sqlalchemy import create_engine, event
@@ -17,13 +17,12 @@ from logger import configure_logging
 
 logger = configure_logging(__name__)
 
-# Base class for declarative models (shared across all schemas)
 Base = declarative_base()
 
 
 class DatabasePoolManager:
     _instance = None
-    _engines: Dict[str, Any] = {}
+    _engines: Dict[str, any] = {}
 
     def __new__(cls):
         if cls._instance is None:
@@ -192,7 +191,3 @@ class AsyncDatabasePoolManager:
         await asyncio.gather(*closing_tasks)
         self._pools.clear()
         # logger.info("All async connection pools closed.")
-
-# Initialize default engine for the application
-db_manager = DatabasePoolManager()
-engine = db_manager.get_engine("public")

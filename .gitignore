@@ -55,8 +55,9 @@ venv/
 **/artifacts/
 **/storage*
 
-# Ignore PyCharm IDE artifacts
+# Ignore IDE artifacts
 .idea/
+.vscode/
 
 # Ignore all databases
 *.db
